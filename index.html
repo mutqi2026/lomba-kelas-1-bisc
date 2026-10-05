@@ -1,0 +1,468 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Kuis Al-Qur'an Interaktif</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Google Fonts: Amiri untuk Arab & Poppins untuk UI -->
+    <link href="https://fonts.googleapis.com/css2?family=Amiri:wght@400;700&family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <!-- FontAwesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <style>
+        body {
+            font-family: 'Poppins', sans-serif;
+            background: linear-gradient(135deg, #0f172a 0%, #1e1b4b 35%, #0f766e 100%);
+            min-height: 100vh;
+        }
+        .font-arabic {
+            font-family: 'Amiri', serif;
+            line-height: 2.6;
+        }
+        .glass-card {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(16px);
+        }
+        .btn-mode {
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        .btn-mode:hover {
+            transform: translateY(-3px);
+        }
+    </style>
+</head>
+<body class="flex items-center justify-center p-4 md:p-6 text-slate-800">
+
+    <!-- Container Utama -->
+    <div class="w-full max-w-2xl glass-card rounded-3xl shadow-2xl overflow-hidden border border-cyan-200/50">
+        
+        <!-- Header -->
+        <header class="bg-gradient-to-r from-blue-700 via-indigo-600 to-cyan-500 text-white p-6 text-center relative overflow-hidden">
+            <div class="absolute -right-10 -top-10 w-32 h-32 bg-white/10 rounded-full blur-2xl"></div>
+            <div class="absolute -left-10 -bottom-10 w-32 h-32 bg-cyan-400/20 rounded-full blur-xl"></div>
+            
+            <div class="relative z-10">
+                <i class="fa-solid font-bold fa-quran text-4xl mb-2 text-cyan-200"></i>
+                <h1 class="text-2xl md:text-3xl font-bold tracking-wide">Kuis Hafalan Qur'an</h1>
+                <p class="text-xs md:text-sm text-cyan-100 mt-1 font-medium">Juz Amma: Surah Al-Qariah (101) s/d An-Nas (114)</p>
+            </div>
+        </header>
+
+        <!-- Dynamic Content Area -->
+        <main class="p-6 md:p-8">
+
+            <!-- SCREEN 1: Menu Mode Kuis -->
+            <div id="screen-menu" class="space-y-4">
+                <h2 class="text-xl font-bold text-center text-indigo-950 mb-6">Pilih Mode Permainan</h2>
+                
+                <button onclick="quizApp.startQuiz('sambung_ayat')" class="btn-mode w-full p-4 rounded-2xl bg-gradient-to-r from-blue-600 to-indigo-600 text-white flex items-center justify-between shadow-lg shadow-blue-500/25">
+                    <div class="flex items-center space-x-4">
+                        <div class="w-12 h-12 bg-white/20 rounded-xl flex items-center justify-center text-xl">
+                            <i class="fa-solid fa-link"></i>
+                        </div>
+                        <div class="text-left">
+                            <h3 class="font-bold text-lg">Sambung Ayat</h3>
+                            <p class="text-xs text-blue-100">Lanjutkan ayat berikutnya dengan benar</p>
+                        </div>
+                    </div>
+                    <i class="fa-solid fa-chevron-right text-cyan-200"></i>
+                </button>
+
+                <button onclick="quizApp.startQuiz('tebak_surat')" class="btn-mode w-full p-4 rounded-2xl bg-gradient-to-r from-indigo-600 to-sky-600 text-white flex items-center justify-between shadow-lg shadow-indigo-500/25">
+                    <div class="flex items-center space-x-4">
+                        <div class="w-12 h-12 bg-white/20 rounded-xl flex items-center justify-center text-xl">
+                            <i class="fa-solid fa-book-open text-amber-300"></i>
+                        </div>
+                        <div class="text-left">
+                            <h3 class="font-bold text-lg">Tebak Nama Surah</h3>
+                            <p class="text-xs text-indigo-100">Tentukan nama surah dari potongan ayat</p>
+                        </div>
+                    </div>
+                    <i class="fa-solid fa-chevron-right text-cyan-200"></i>
+                </button>
+
+                <button onclick="quizApp.startQuiz('sambung_surat')" class="btn-mode w-full p-4 rounded-2xl bg-gradient-to-r from-sky-600 to-cyan-600 text-white flex items-center justify-between shadow-lg shadow-cyan-500/25">
+                    <div class="flex items-center space-x-4">
+                        <div class="w-12 h-12 bg-white/20 rounded-xl flex items-center justify-center text-xl">
+                            <i class="fa-solid fa-forward"></i>
+                        </div>
+                        <div class="text-left">
+                            <h3 class="font-bold text-lg">Sambung Surah</h3>
+                            <p class="text-xs text-cyan-100">Tebak surah urutan berikutnya</p>
+                        </div>
+                    </div>
+                    <i class="fa-solid fa-chevron-right text-cyan-200"></i>
+                </button>
+            </div>
+
+            <!-- SCREEN 2: Loading Status -->
+            <div id="screen-loading" class="hidden py-12 text-center space-y-4">
+                <div class="inline-block animate-spin rounded-full h-12 w-12 border-4 border-indigo-600 border-t-transparent"></div>
+                <p class="text-indigo-900 font-semibold text-sm">Mengambil data ayat dari API...</p>
+            </div>
+
+            <!-- SCREEN 3: Area Soal Kuis -->
+            <div id="screen-quiz" class="hidden space-y-6">
+                
+                <!-- Status Bar -->
+                <div class="flex justify-between items-center text-sm font-semibold text-slate-500 pb-3 border-b border-slate-200">
+                    <span id="badge-mode" class="px-3 py-1 rounded-full bg-indigo-100 text-indigo-700 text-xs">Sambung Ayat</span>
+                    <span>Soal: <span id="current-index" class="text-indigo-600 font-bold">1</span> / 10</span>
+                    <span>Skor: <span id="current-score" class="text-emerald-600 font-bold">0</span></span>
+                </div>
+
+                <!-- Card Soal -->
+                <div class="bg-gradient-to-b from-slate-50 to-indigo-50/50 p-6 rounded-2xl border border-indigo-100/80 shadow-inner">
+                    <p id="prompt-text" class="text-xs font-semibold uppercase tracking-wider text-indigo-500 mb-6 text-center">Soal</p>
+                    <div id="question-box" class="text-center">
+                        <!-- Teks Ayat/Soal Arab akan muncul di sini -->
+                    </div>
+                </div>
+
+                <!-- Pilihan Jawaban -->
+                <div id="options-container" class="grid grid-cols-1 gap-3">
+                    <!-- Tombol pilihan dibuat secara dinamis oleh JS -->
+                </div>
+
+                <!-- Navigasi Bawah -->
+                <div class="flex justify-between items-center pt-2">
+                    <button onclick="quizApp.showMenu()" class="px-4 py-2 text-xs font-semibold text-slate-500 hover:text-slate-800 flex items-center space-x-1">
+                        <i class="fa-solid fa-arrow-left"></i>
+                        <span>Kembali ke Menu</span>
+                    </button>
+                    <button id="btn-next" onclick="quizApp.nextQuestion()" class="hidden px-6 py-2.5 rounded-xl bg-gradient-to-r from-blue-600 to-indigo-600 text-white font-semibold text-sm shadow-md hover:shadow-lg transition">
+                        Lanjut <i class="fa-solid fa-arrow-right ml-1"></i>
+                    </button>
+                </div>
+            </div>
+
+            <!-- SCREEN 4: Hasil Akhir -->
+            <div id="screen-result" class="hidden text-center py-6 space-y-6">
+                <div class="w-20 h-20 bg-emerald-100 text-emerald-600 rounded-full flex items-center justify-center text-4xl mx-auto shadow-inner">
+                    <i class="fa-solid fa-trophy"></i>
+                </div>
+                <div>
+                    <h2 class="text-2xl font-bold text-slate-800">Kuis Selesai!</h2>
+                    <p class="text-slate-500 text-sm mt-1">Terus muraja'ah dan tingkatkan hafalanmu.</p>
+                </div>
+
+                <div class="bg-indigo-50 p-4 rounded-2xl border border-indigo-100 flex justify-around items-center">
+                    <div>
+                        <p class="text-xs text-slate-500 font-medium">Total Skor</p>
+                        <p id="final-score" class="text-3xl font-extrabold text-indigo-600">0</p>
+                    </div>
+                    <div class="h-8 w-px bg-slate-200"></div>
+                    <div>
+                        <p class="text-xs text-slate-500 font-medium">Akurasi</p>
+                        <p id="final-accuracy" class="text-3xl font-extrabold text-emerald-600">0%</p>
+                    </div>
+                </div>
+
+                <div class="flex space-x-3">
+                    <button onclick="quizApp.restartCurrentQuiz()" class="flex-1 py-3 rounded-xl bg-indigo-600 text-white font-semibold text-sm shadow-lg shadow-indigo-500/30 hover:bg-indigo-700 transition">
+                        Coba Lagi
+                    </button>
+                    <button onclick="quizApp.showMenu()" class="flex-1 py-3 rounded-xl bg-slate-100 text-slate-700 font-semibold text-sm hover:bg-slate-200 transition">
+                        Pilih Mode
+                    </button>
+                </div>
+            </div>
+
+        </main>
+    </div>
+
+    <!-- Script JavaScript Logic -->
+    <script>
+        class QuranQuizApp {
+            constructor() {
+                this.surahsData = [];
+                this.questions = [];
+                this.currentIndex = 0;
+                this.score = 0;
+                this.selectedMode = '';
+                this.isAnswered = false;
+
+                // Batas Rentang Surah: 101 (Al-Qari'ah) s/d 114 (An-Nas)
+                this.MIN_SURAH = 101;
+                this.MAX_SURAH = 114;
+                this.TOTAL_QUESTIONS = 10;
+
+                this.initDOM();
+            }
+
+            initDOM() {
+                this.screens = {
+                    menu: document.getElementById('screen-menu'),
+                    loading: document.getElementById('screen-loading'),
+                    quiz: document.getElementById('screen-quiz'),
+                    result: document.getElementById('screen-result')
+                };
+                this.badgeMode = document.getElementById('badge-mode');
+                this.currentIdxEl = document.getElementById('current-index');
+                this.currentScoreEl = document.getElementById('current-score');
+                this.promptText = document.getElementById('prompt-text');
+                this.questionBox = document.getElementById('question-box');
+                this.optionsContainer = document.getElementById('options-container');
+                this.btnNext = document.getElementById('btn-next');
+            }
+
+            // Pindah Tampilan Layar
+            switchScreen(screenName) {
+                Object.keys(this.screens).forEach(key => {
+                    this.screens[key].classList.add('hidden');
+                });
+                this.screens[screenName].classList.remove('hidden');
+            }
+
+            // Fetch Data dari API Kemenag / equran.id
+            async fetchSurahData() {
+                if (this.surahsData.length > 0) return true; // Sudah ter-load
+
+                this.switchScreen('loading');
+                try {
+                    const fetchPromises = [];
+                    for (let i = this.MIN_SURAH; i <= this.MAX_SURAH; i++) {
+                        fetchPromises.push(
+                            fetch(`https://equran.id/api/v2/surat/${i}`).then(res => res.json())
+                        );
+                    }
+                    
+                    const responses = await Promise.all(fetchPromises);
+                    this.surahsData = responses.map(res => res.data);
+                    return true;
+                } catch (error) {
+                    alert(`Gagal mengambil data dari API Al-Qur'an. Periksa koneksi internet Anda.`);
+                    this.switchScreen('menu');
+                    return false;
+                }
+            }
+
+            // Memulai Permainan
+            async startQuiz(mode) {
+                this.selectedMode = mode;
+                const loaded = await this.fetchSurahData();
+                if (!loaded) return;
+
+                this.currentIndex = 0;
+                this.score = 0;
+                this.generateQuestions();
+                this.renderQuestion();
+                this.switchScreen('quiz');
+            }
+
+            restartCurrentQuiz() {
+                this.startQuiz(this.selectedMode);
+            }
+
+            showMenu() {
+                this.switchScreen('menu');
+            }
+
+            // Generator Soal berdasarkan Mode
+            generateQuestions() {
+                this.questions = [];
+
+                for (let i = 0; i < this.TOTAL_QUESTIONS; i++) {
+                    if (this.selectedMode === 'sambung_ayat') {
+                        this.questions.push(this.createSambungAyatQuestion());
+                    } else if (this.selectedMode === 'tebak_surat') {
+                        this.questions.push(this.createTebakSuratQuestion());
+                    } else if (this.selectedMode === 'sambung_surat') {
+                        this.questions.push(this.createSambungSuratQuestion());
+                    }
+                }
+            }
+
+            // Helper: Ambil Item Acak dari Array
+            getRandomItem(array) {
+                return array[Math.floor(Math.random() * array.length)];
+            }
+
+            // Helper: Acak Array (Shuffle)
+            shuffleArray(array) {
+                return array.sort(() => Math.random() - 0.5);
+            }
+
+            // Mode 1: Sambung Ayat
+            createSambungAyatQuestion() {
+                const surah = this.getRandomItem(this.surahsData);
+                // Pilih ayat selain ayat terakhir
+                const validAyatCount = surah.jumlahAyat - 1;
+                
+                if (validAyatCount < 1) {
+                    return this.createTebakSuratQuestion(); // Fallback jika ayat cuma 1
+                }
+
+                const randomAyatIdx = Math.floor(Math.random() * validAyatCount);
+                const currentAyat = surah.ayat[randomAyatIdx];
+                const nextAyat = surah.ayat[randomAyatIdx + 1];
+
+                // Buat Pilihan Jawaban Salah
+                let wrongOptions = [];
+                while (wrongOptions.length < 3) {
+                    const randomSurah = this.getRandomItem(this.surahsData);
+                    const randomAyat = this.getRandomItem(randomSurah.ayat);
+                    
+                    if (randomAyat.teksArab !== nextAyat.teksArab && !wrongOptions.includes(randomAyat.teksArab)) {
+                        wrongOptions.push(randomAyat.teksArab);
+                    }
+                }
+
+                const options = this.shuffleArray([nextAyat.teksArab, ...wrongOptions]);
+
+                return {
+                    prompt: `Lanjutkan ayat berikutnya dari Surah ${surah.namaLatin}:`,
+                    questionText: `<p class="font-arabic text-2xl md:text-3xl text-indigo-950 font-bold pt-2 mb-2" dir="rtl">${currentAyat.teksArab}</p>
+                                   <p class="text-xs text-slate-500 mt-2">(Ayat ${currentAyat.nomorAyat})</p>`,
+                    correctAnswer: nextAyat.teksArab,
+                    options: options,
+                    isArabicOption: true
+                };
+            }
+
+            // Mode 2: Tebak Nama Surah
+            createTebakSuratQuestion() {
+                const surah = this.getRandomItem(this.surahsData);
+                const ayat = this.getRandomItem(surah.ayat);
+
+                let wrongOptions = [];
+                while (wrongOptions.length < 3) {
+                    const randomSurah = this.getRandomItem(this.surahsData);
+                    if (randomSurah.namaLatin !== surah.namaLatin && !wrongOptions.includes(randomSurah.namaLatin)) {
+                        wrongOptions.push(randomSurah.namaLatin);
+                    }
+                }
+
+                const options = this.shuffleArray([surah.namaLatin, ...wrongOptions]);
+
+                return {
+                    prompt: "Potongan ayat di bawah ini merupakan bagian dari Surah:",
+                    questionText: `<p class="font-arabic text-2xl md:text-3xl text-indigo-950 font-bold pt-2" dir="rtl">${ayat.teksArab}</p>`,
+                    correctAnswer: surah.namaLatin,
+                    options: options,
+                    isArabicOption: false
+                };
+            }
+
+            // Mode 3: Sambung Surah
+            createSambungSuratQuestion() {
+                // Pilih surah kecuali An-Nas (karena An-Nas surah paling akhir)
+                const validSurahs = this.surahsData.filter(s => s.nomor < 114);
+                const currentSurah = this.getRandomItem(validSurahs);
+                const nextSurah = this.surahsData.find(s => s.nomor === currentSurah.nomor + 1);
+
+                let wrongOptions = [];
+                while (wrongOptions.length < 3) {
+                    const randomSurah = this.getRandomItem(this.surahsData);
+                    if (randomSurah.namaLatin !== nextSurah.namaLatin && 
+                        randomSurah.namaLatin !== currentSurah.namaLatin && 
+                        !wrongOptions.includes(randomSurah.namaLatin)) {
+                        wrongOptions.push(randomSurah.namaLatin);
+                    }
+                }
+
+                const options = this.shuffleArray([nextSurah.namaLatin, ...wrongOptions]);
+
+                return {
+                    prompt: "Surah apakah yang urutannya langsung setelah Surah ini?",
+                    questionText: `<p class="text-3xl font-extrabold text-indigo-900 pt-2 mb-2">${currentSurah.namaLatin}</p>
+                                   <p class="font-arabic text-xl text-indigo-600" dir="rtl">${currentSurah.nama}</p>`,
+                    correctAnswer: nextSurah.namaLatin,
+                    options: options,
+                    isArabicOption: false
+                };
+            }
+
+            // Render Soal ke Layar
+            renderQuestion() {
+                this.isAnswered = false;
+                this.btnNext.classList.add('hidden');
+
+                const q = this.questions[this.currentIndex];
+
+                // Set Badge Mode Text
+                const modeLabels = {
+                    'sambung_ayat': 'Sambung Ayat',
+                    'tebak_surat': 'Tebak Surah',
+                    'sambung_surat': 'Sambung Surah'
+                };
+                this.badgeMode.textContent = modeLabels[this.selectedMode];
+                this.currentIdxEl.textContent = this.currentIndex + 1;
+                this.currentScoreEl.textContent = this.score;
+
+                this.promptText.textContent = q.prompt;
+                this.questionBox.innerHTML = q.questionText;
+
+                // Render Options
+                this.optionsContainer.innerHTML = '';
+                q.options.forEach((opt) => {
+                    const btn = document.createElement('button');
+                    btn.className = `w-full p-4 rounded-xl border-2 border-slate-200 bg-white hover:border-indigo-400 hover:bg-indigo-50/50 transition-all text-left flex items-center justify-between group`;
+                    
+                    const textClass = q.isArabicOption ? 'font-arabic text-xl md:text-2xl text-right w-full text-slate-800' : 'font-semibold text-slate-700 text-sm md:text-base';
+                    const dirAttr = q.isArabicOption ? 'dir="rtl"' : '';
+
+                    btn.innerHTML = `<span class="${textClass}" ${dirAttr}>${opt}</span>`;
+                    btn.onclick = () => this.checkAnswer(btn, opt, q.correctAnswer);
+                    this.optionsContainer.appendChild(btn);
+                });
+            }
+
+            // Pemeriksaan Jawaban
+            checkAnswer(selectedBtn, selectedOpt, correctOpt) {
+                if (this.isAnswered) return;
+                this.isAnswered = true;
+
+                const allButtons = this.optionsContainer.querySelectorAll('button');
+
+                if (selectedOpt === correctOpt) {
+                    this.score += 10;
+                    this.currentScoreEl.textContent = this.score;
+                    selectedBtn.classList.remove('border-slate-200', 'bg-white');
+                    selectedBtn.classList.add('border-emerald-500', 'bg-emerald-50', 'text-emerald-900');
+                    selectedBtn.innerHTML += `<i class="fa-solid fa-circle-check text-emerald-600 text-lg ml-2"></i>`;
+                } else {
+                    selectedBtn.classList.remove('border-slate-200', 'bg-white');
+                    selectedBtn.classList.add('border-rose-500', 'bg-rose-50', 'text-rose-900');
+                    selectedBtn.innerHTML += `<i class="fa-solid fa-circle-xmark text-rose-600 text-lg ml-2"></i>`;
+
+                    // Highlight jawaban yang benar
+                    allButtons.forEach(btn => {
+                        if (btn.innerText.includes(correctOpt)) {
+                            btn.classList.remove('border-slate-200', 'bg-white');
+                            btn.classList.add('border-emerald-500', 'bg-emerald-50');
+                        }
+                    });
+                }
+
+                // Nonaktifkan semua tombol setelah memilih
+                allButtons.forEach(btn => btn.disabled = true);
+                this.btnNext.classList.remove('hidden');
+            }
+
+            // Lanjut ke Soal Berikutnya
+            nextQuestion() {
+                this.currentIndex++;
+                if (this.currentIndex < this.TOTAL_QUESTIONS) {
+                    this.renderQuestion();
+                } else {
+                    this.showResult();
+                }
+            }
+
+            // Tampilkan Hasil Akhir
+            showResult() {
+                document.getElementById('final-score').textContent = this.score;
+                const accuracy = (this.score / (this.TOTAL_QUESTIONS * 10)) * 100;
+                document.getElementById('final-accuracy').textContent = `${accuracy}%`;
+                this.switchScreen('result');
+            }
+        }
+
+        // Inisialisasi Aplikasi Kuis
+        const quizApp = new QuranQuizApp();
+    </script>
+</body>
+</html>
