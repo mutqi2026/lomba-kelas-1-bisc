@@ -3,11 +3,11 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Kuis Al-Qur'an Interaktif</title>
+    <title>Kuis Hafalan Al-Qur'an Interaktif</title>
     <!-- Tailwind CSS CDN -->
     <script src="https://cdn.tailwindcss.com"></script>
-    <!-- Google Fonts: Amiri untuk Arab & Poppins untuk UI -->
-    <link href="https://fonts.googleapis.com/css2?family=Amiri:wght@400;700&family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <!-- Google Fonts: Amiri for Arabic & Poppins for UI -->
+    <link href="https://fonts.googleapis.com/css2?family=Amiri:ital,wght@0,400;0,700;1,400&family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
     <!-- FontAwesome Icons -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     
@@ -22,23 +22,23 @@
             line-height: 2.6;
         }
         .glass-card {
-            background: rgba(255, 255, 255, 0.95);
+            background: rgba(255, 255, 255, 0.96);
             backdrop-filter: blur(16px);
         }
-        .btn-mode {
+        .btn-card {
             transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
         }
-        .btn-mode:hover {
+        .btn-card:hover {
             transform: translateY(-3px);
         }
     </style>
 </head>
-<body class="flex items-center justify-center p-4 md:p-6 text-slate-800">
+<body class="flex items-center justify-center p-4 md:p-6 text-slate-800 min-h-screen">
 
     <!-- Container Utama -->
-    <div class="w-full max-w-2xl glass-card rounded-3xl shadow-2xl overflow-hidden border border-cyan-200/50">
+    <div class="w-full max-w-2xl glass-card rounded-3xl shadow-2xl overflow-hidden border border-cyan-200/50 my-auto">
         
-        <!-- Header -->
+        <!-- Header Aplikasi -->
         <header class="bg-gradient-to-r from-blue-700 via-indigo-600 to-cyan-500 text-white p-6 text-center relative overflow-hidden">
             <div class="absolute -right-10 -top-10 w-32 h-32 bg-white/10 rounded-full blur-2xl"></div>
             <div class="absolute -left-10 -bottom-10 w-32 h-32 bg-cyan-400/20 rounded-full blur-xl"></div>
@@ -46,18 +46,65 @@
             <div class="relative z-10">
                 <i class="fa-solid font-bold fa-quran text-4xl mb-2 text-cyan-200"></i>
                 <h1 class="text-2xl md:text-3xl font-bold tracking-wide">Kuis Hafalan Qur'an</h1>
-                <p class="text-xs md:text-sm text-cyan-100 mt-1 font-medium">Juz Amma: Surah Al-Qariah (101) s/d An-Nas (114)</p>
+                <p id="header-subtitle" class="text-xs md:text-sm text-cyan-100 mt-1 font-medium">Uji & Tingkatkan Hafalan Juz Amma</p>
             </div>
         </header>
 
         <!-- Dynamic Content Area -->
         <main class="p-6 md:p-8">
 
-            <!-- SCREEN 1: Menu Mode Kuis -->
-            <div id="screen-menu" class="space-y-4">
-                <h2 class="text-xl font-bold text-center text-indigo-950 mb-6">Pilih Mode Permainan</h2>
+            <!-- SCREEN 1: Pemilihan Kelas -->
+            <div id="screen-grade" class="space-y-4">
+                <div class="text-center mb-6">
+                    <h2 class="text-xl font-bold text-indigo-950">Pilih Tingkat Kelas</h2>
+                    <p class="text-xs text-slate-500 mt-1">Pilih tingkatan untuk menyesuaikan jangkauan surah hafalan</p>
+                </div>
                 
-                <button onclick="quizApp.startQuiz('sambung_ayat')" class="btn-mode w-full p-4 rounded-2xl bg-gradient-to-r from-blue-600 to-indigo-600 text-white flex items-center justify-between shadow-lg shadow-blue-500/25">
+                <button onclick="quizApp.selectGrade(1)" class="btn-card w-full p-5 rounded-2xl bg-gradient-to-r from-blue-600 via-indigo-600 to-indigo-700 text-white flex items-center justify-between shadow-lg shadow-blue-500/25 border border-blue-400/30">
+                    <div class="flex items-center space-x-4">
+                        <div class="w-12 h-12 bg-white/20 rounded-xl flex items-center justify-center text-2xl font-bold text-amber-300">
+                            1
+                        </div>
+                        <div class="text-left">
+                            <h3 class="font-bold text-lg">Kelas 1</h3>
+                            <p class="text-xs text-blue-100 mt-0.5">Surah An-Nas (114) s/d Al-Qari'ah (101)</p>
+                            <p class="text-[10px] text-cyan-200 mt-0.5 font-medium">Total 14 Surah Pendek</p>
+                        </div>
+                    </div>
+                    <i class="fa-solid fa-chevron-right text-cyan-200 text-lg"></i>
+                </button>
+
+                <button onclick="quizApp.selectGrade(2)" class="btn-card w-full p-5 rounded-2xl bg-gradient-to-r from-indigo-600 via-sky-600 to-cyan-600 text-white flex items-center justify-between shadow-lg shadow-indigo-500/25 border border-indigo-400/30">
+                    <div class="flex items-center space-x-4">
+                        <div class="w-12 h-12 bg-white/20 rounded-xl flex items-center justify-center text-2xl font-bold text-amber-300">
+                            2
+                        </div>
+                        <div class="text-left">
+                            <h3 class="font-bold text-lg">Kelas 2</h3>
+                            <p class="text-xs text-indigo-100 mt-0.5">Surah An-Nas (114) s/d Al-Bayyinah (98)</p>
+                            <p class="text-[10px] text-cyan-200 mt-0.5 font-medium">Total 17 Surah (Tingkat Lanjut)</p>
+                        </div>
+                    </div>
+                    <i class="fa-solid fa-chevron-right text-cyan-200 text-lg"></i>
+                </button>
+            </div>
+
+            <!-- SCREEN 2: Menu Mode Kuis -->
+            <div id="screen-menu" class="hidden space-y-4">
+                <div class="flex items-center justify-between mb-4 pb-2 border-b border-slate-200">
+                    <div>
+                        <span id="selected-grade-badge" class="px-3 py-1 rounded-full bg-indigo-100 text-indigo-800 text-xs font-bold">Kelas 1</span>
+                        <p id="selected-grade-range" class="text-[11px] text-slate-500 mt-1">An-Nas s/d Al-Qari'ah</p>
+                    </div>
+                    <button onclick="quizApp.showGradeSelection()" class="text-xs font-semibold text-indigo-600 hover:text-indigo-800 flex items-center space-x-1 bg-indigo-50 px-2.5 py-1.5 rounded-lg border border-indigo-100">
+                        <i class="fa-solid fa-rotate text-indigo-500"></i>
+                        <span>Ganti Kelas</span>
+                    </button>
+                </div>
+
+                <h2 class="text-xl font-bold text-center text-indigo-950 mb-4">Pilih Mode Kuis</h2>
+                
+                <button onclick="quizApp.startQuiz('sambung_ayat')" class="btn-card w-full p-4 rounded-2xl bg-gradient-to-r from-blue-600 to-indigo-600 text-white flex items-center justify-between shadow-lg shadow-blue-500/25">
                     <div class="flex items-center space-x-4">
                         <div class="w-12 h-12 bg-white/20 rounded-xl flex items-center justify-center text-xl">
                             <i class="fa-solid fa-link"></i>
@@ -70,7 +117,7 @@
                     <i class="fa-solid fa-chevron-right text-cyan-200"></i>
                 </button>
 
-                <button onclick="quizApp.startQuiz('tebak_surat')" class="btn-mode w-full p-4 rounded-2xl bg-gradient-to-r from-indigo-600 to-sky-600 text-white flex items-center justify-between shadow-lg shadow-indigo-500/25">
+                <button onclick="quizApp.startQuiz('tebak_surat')" class="btn-card w-full p-4 rounded-2xl bg-gradient-to-r from-indigo-600 to-sky-600 text-white flex items-center justify-between shadow-lg shadow-indigo-500/25">
                     <div class="flex items-center space-x-4">
                         <div class="w-12 h-12 bg-white/20 rounded-xl flex items-center justify-center text-xl">
                             <i class="fa-solid fa-book-open text-amber-300"></i>
@@ -83,34 +130,40 @@
                     <i class="fa-solid fa-chevron-right text-cyan-200"></i>
                 </button>
 
-                <button onclick="quizApp.startQuiz('sambung_surat')" class="btn-mode w-full p-4 rounded-2xl bg-gradient-to-r from-sky-600 to-cyan-600 text-white flex items-center justify-between shadow-lg shadow-cyan-500/25">
+                <button onclick="quizApp.startQuiz('sambung_surat')" class="btn-card w-full p-4 rounded-2xl bg-gradient-to-r from-sky-600 to-cyan-600 text-white flex items-center justify-between shadow-lg shadow-cyan-500/25">
                     <div class="flex items-center space-x-4">
                         <div class="w-12 h-12 bg-white/20 rounded-xl flex items-center justify-center text-xl">
                             <i class="fa-solid fa-forward"></i>
                         </div>
                         <div class="text-left">
                             <h3 class="font-bold text-lg">Sambung Surah</h3>
-                            <p class="text-xs text-cyan-100">Tebak surah urutan berikutnya</p>
+                            <p class="text-xs text-cyan-100">Tebak nama surah urutan berikutnya</p>
                         </div>
                     </div>
                     <i class="fa-solid fa-chevron-right text-cyan-200"></i>
                 </button>
             </div>
 
-            <!-- SCREEN 2: Loading Status -->
+            <!-- SCREEN 3: Loading Status -->
             <div id="screen-loading" class="hidden py-12 text-center space-y-4">
                 <div class="inline-block animate-spin rounded-full h-12 w-12 border-4 border-indigo-600 border-t-transparent"></div>
-                <p class="text-indigo-900 font-semibold text-sm">Mengambil data ayat dari API...</p>
+                <p class="text-indigo-900 font-semibold text-sm">Mengambil data ayat dari API Al-Qur'an...</p>
+                <p class="text-xs text-slate-500">Mohon tunggu sebentar</p>
             </div>
 
-            <!-- SCREEN 3: Area Soal Kuis -->
+            <!-- SCREEN 4: Area Soal Kuis -->
             <div id="screen-quiz" class="hidden space-y-6">
                 
                 <!-- Status Bar -->
-                <div class="flex justify-between items-center text-sm font-semibold text-slate-500 pb-3 border-b border-slate-200">
-                    <span id="badge-mode" class="px-3 py-1 rounded-full bg-indigo-100 text-indigo-700 text-xs">Sambung Ayat</span>
-                    <span>Soal: <span id="current-index" class="text-indigo-600 font-bold">1</span> / 10</span>
-                    <span>Skor: <span id="current-score" class="text-emerald-600 font-bold">0</span></span>
+                <div class="flex flex-wrap gap-2 justify-between items-center text-xs md:text-sm font-semibold text-slate-500 pb-3 border-b border-slate-200">
+                    <div class="flex items-center space-x-1.5">
+                        <span id="quiz-badge-grade" class="px-2.5 py-1 rounded-full bg-blue-100 text-blue-800 text-xs font-bold">Kelas 1</span>
+                        <span id="quiz-badge-mode" class="px-2.5 py-1 rounded-full bg-indigo-100 text-indigo-700 text-xs">Sambung Ayat</span>
+                    </div>
+                    <div class="flex items-center space-x-4">
+                        <span>Soal: <span id="current-index" class="text-indigo-600 font-bold">1</span> / 10</span>
+                        <span>Skor: <span id="current-score" class="text-emerald-600 font-bold">0</span></span>
+                    </div>
                 </div>
 
                 <!-- Card Soal -->
@@ -128,9 +181,9 @@
 
                 <!-- Navigasi Bawah -->
                 <div class="flex justify-between items-center pt-2">
-                    <button onclick="quizApp.showMenu()" class="px-4 py-2 text-xs font-semibold text-slate-500 hover:text-slate-800 flex items-center space-x-1">
+                    <button onclick="quizApp.showModeMenu()" class="px-4 py-2 text-xs font-semibold text-slate-500 hover:text-slate-800 flex items-center space-x-1">
                         <i class="fa-solid fa-arrow-left"></i>
-                        <span>Kembali ke Menu</span>
+                        <span>Menu Mode</span>
                     </button>
                     <button id="btn-next" onclick="quizApp.nextQuestion()" class="hidden px-6 py-2.5 rounded-xl bg-gradient-to-r from-blue-600 to-indigo-600 text-white font-semibold text-sm shadow-md hover:shadow-lg transition">
                         Lanjut <i class="fa-solid fa-arrow-right ml-1"></i>
@@ -138,7 +191,7 @@
                 </div>
             </div>
 
-            <!-- SCREEN 4: Hasil Akhir -->
+            <!-- SCREEN 5: Hasil Akhir -->
             <div id="screen-result" class="hidden text-center py-6 space-y-6">
                 <div class="w-20 h-20 bg-emerald-100 text-emerald-600 rounded-full flex items-center justify-center text-4xl mx-auto shadow-inner">
                     <i class="fa-solid fa-trophy"></i>
@@ -160,12 +213,12 @@
                     </div>
                 </div>
 
-                <div class="flex space-x-3">
+                <div class="flex flex-col sm:flex-row gap-3">
                     <button onclick="quizApp.restartCurrentQuiz()" class="flex-1 py-3 rounded-xl bg-indigo-600 text-white font-semibold text-sm shadow-lg shadow-indigo-500/30 hover:bg-indigo-700 transition">
                         Coba Lagi
                     </button>
-                    <button onclick="quizApp.showMenu()" class="flex-1 py-3 rounded-xl bg-slate-100 text-slate-700 font-semibold text-sm hover:bg-slate-200 transition">
-                        Pilih Mode
+                    <button onclick="quizApp.showModeMenu()" class="flex-1 py-3 rounded-xl bg-slate-100 text-slate-700 font-semibold text-sm hover:bg-slate-200 transition">
+                        Pilih Mode Kuis
                     </button>
                 </div>
             </div>
@@ -177,16 +230,20 @@
     <script>
         class QuranQuizApp {
             constructor() {
+                // Konfigurasi Kelas
+                this.GRADE_CONFIG = {
+                    1: { name: 'Kelas 1', minSurah: 101, maxSurah: 114, label: 'An-Nas s/d Al-Qari\'ah' },
+                    2: { name: 'Kelas 2', minSurah: 98, maxSurah: 114, label: 'An-Nas s/d Al-Bayyinah' }
+                };
+
+                this.selectedGrade = 1;
+                this.loadedGrade = null; // Cache tracker
                 this.surahsData = [];
                 this.questions = [];
                 this.currentIndex = 0;
                 this.score = 0;
                 this.selectedMode = '';
                 this.isAnswered = false;
-
-                // Batas Rentang Surah: 101 (Al-Qari'ah) s/d 114 (An-Nas)
-                this.MIN_SURAH = 101;
-                this.MAX_SURAH = 114;
                 this.TOTAL_QUESTIONS = 10;
 
                 this.initDOM();
@@ -194,12 +251,20 @@
 
             initDOM() {
                 this.screens = {
+                    grade: document.getElementById('screen-grade'),
                     menu: document.getElementById('screen-menu'),
                     loading: document.getElementById('screen-loading'),
                     quiz: document.getElementById('screen-quiz'),
                     result: document.getElementById('screen-result')
                 };
-                this.badgeMode = document.getElementById('badge-mode');
+
+                // UI Elements
+                this.headerSubtitle = document.getElementById('header-subtitle');
+                this.selectedGradeBadge = document.getElementById('selected-grade-badge');
+                this.selectedGradeRange = document.getElementById('selected-grade-range');
+                this.quizBadgeGrade = document.getElementById('quiz-badge-grade');
+                this.quizBadgeMode = document.getElementById('quiz-badge-mode');
+                
                 this.currentIdxEl = document.getElementById('current-index');
                 this.currentScoreEl = document.getElementById('current-score');
                 this.promptText = document.getElementById('prompt-text');
@@ -208,7 +273,7 @@
                 this.btnNext = document.getElementById('btn-next');
             }
 
-            // Pindah Tampilan Layar
+            // Navigation Helper
             switchScreen(screenName) {
                 Object.keys(this.screens).forEach(key => {
                     this.screens[key].classList.add('hidden');
@@ -216,24 +281,54 @@
                 this.screens[screenName].classList.remove('hidden');
             }
 
-            // Fetch Data dari API Kemenag / equran.id
+            // Pemilihan Kelas di Layar Awal
+            selectGrade(gradeNum) {
+                this.selectedGrade = gradeNum;
+                const gradeInfo = this.GRADE_CONFIG[gradeNum];
+                
+                this.selectedGradeBadge.textContent = gradeInfo.name;
+                this.selectedGradeRange.textContent = gradeInfo.label;
+                this.headerSubtitle.textContent = `Hafalan Qur'an - ${gradeInfo.name} (${gradeInfo.label})`;
+                
+                this.switchScreen('menu');
+            }
+
+            showGradeSelection() {
+                this.headerSubtitle.textContent = "Uji & Tingkatkan Hafalan Juz Amma";
+                this.switchScreen('grade');
+            }
+
+            showModeMenu() {
+                this.switchScreen('menu');
+            }
+
+            // Fetch Data Surah dari API equran.id secara Dinamis sesuai Kelas
             async fetchSurahData() {
-                if (this.surahsData.length > 0) return true; // Sudah ter-load
+                const config = this.GRADE_CONFIG[this.selectedGrade];
+                
+                // Jika data kelas ini sudah pernah didownload, tidak usah fetch ulang
+                if (this.loadedGrade === this.selectedGrade && this.surahsData.length > 0) {
+                    return true;
+                }
 
                 this.switchScreen('loading');
                 try {
                     const fetchPromises = [];
-                    for (let i = this.MIN_SURAH; i <= this.MAX_SURAH; i++) {
+                    for (let i = config.minSurah; i <= config.maxSurah; i++) {
                         fetchPromises.push(
-                            fetch(`https://equran.id/api/v2/surat/${i}`).then(res => res.json())
+                            fetch(`https://equran.id/api/v2/surat/${i}`).then(res => {
+                                if (!res.ok) throw new Error('Jaringan bermasalah');
+                                return res.json();
+                            })
                         );
                     }
                     
                     const responses = await Promise.all(fetchPromises);
                     this.surahsData = responses.map(res => res.data);
+                    this.loadedGrade = this.selectedGrade;
                     return true;
                 } catch (error) {
-                    alert(`Gagal mengambil data dari API Al-Qur'an. Periksa koneksi internet Anda.`);
+                    alert(`Gagal mengambil data dari API Al-Qur'an. Silakan periksa koneksi internet Anda.`);
                     this.switchScreen('menu');
                     return false;
                 }
@@ -256,11 +351,7 @@
                 this.startQuiz(this.selectedMode);
             }
 
-            showMenu() {
-                this.switchScreen('menu');
-            }
-
-            // Generator Soal berdasarkan Mode
+            // Generator Soal berdasarkan Mode Kuis
             generateQuestions() {
                 this.questions = [];
 
@@ -275,31 +366,27 @@
                 }
             }
 
-            // Helper: Ambil Item Acak dari Array
             getRandomItem(array) {
                 return array[Math.floor(Math.random() * array.length)];
             }
 
-            // Helper: Acak Array (Shuffle)
             shuffleArray(array) {
-                return array.sort(() => Math.random() - 0.5);
+                return [...array].sort(() => Math.random() - 0.5);
             }
 
             // Mode 1: Sambung Ayat
             createSambungAyatQuestion() {
                 const surah = this.getRandomItem(this.surahsData);
-                // Pilih ayat selain ayat terakhir
                 const validAyatCount = surah.jumlahAyat - 1;
                 
                 if (validAyatCount < 1) {
-                    return this.createTebakSuratQuestion(); // Fallback jika ayat cuma 1
+                    return this.createTebakSuratQuestion();
                 }
 
                 const randomAyatIdx = Math.floor(Math.random() * validAyatCount);
                 const currentAyat = surah.ayat[randomAyatIdx];
                 const nextAyat = surah.ayat[randomAyatIdx + 1];
 
-                // Buat Pilihan Jawaban Salah
                 let wrongOptions = [];
                 while (wrongOptions.length < 3) {
                     const randomSurah = this.getRandomItem(this.surahsData);
@@ -348,7 +435,7 @@
 
             // Mode 3: Sambung Surah
             createSambungSuratQuestion() {
-                // Pilih surah kecuali An-Nas (karena An-Nas surah paling akhir)
+                // Pilih surah kecuali An-Nas (surah 114 paling akhir)
                 const validSurahs = this.surahsData.filter(s => s.nomor < 114);
                 const currentSurah = this.getRandomItem(validSurahs);
                 const nextSurah = this.surahsData.find(s => s.nomor === currentSurah.nomor + 1);
@@ -382,26 +469,29 @@
 
                 const q = this.questions[this.currentIndex];
 
-                // Set Badge Mode Text
                 const modeLabels = {
                     'sambung_ayat': 'Sambung Ayat',
                     'tebak_surat': 'Tebak Surah',
                     'sambung_surat': 'Sambung Surah'
                 };
-                this.badgeMode.textContent = modeLabels[this.selectedMode];
+
+                this.quizBadgeGrade.textContent = this.GRADE_CONFIG[this.selectedGrade].name;
+                this.quizBadgeMode.textContent = modeLabels[this.selectedMode];
                 this.currentIdxEl.textContent = this.currentIndex + 1;
                 this.currentScoreEl.textContent = this.score;
 
                 this.promptText.textContent = q.prompt;
                 this.questionBox.innerHTML = q.questionText;
 
-                // Render Options
+                // Render Pilihan Jawaban
                 this.optionsContainer.innerHTML = '';
                 q.options.forEach((opt) => {
                     const btn = document.createElement('button');
                     btn.className = `w-full p-4 rounded-xl border-2 border-slate-200 bg-white hover:border-indigo-400 hover:bg-indigo-50/50 transition-all text-left flex items-center justify-between group`;
                     
-                    const textClass = q.isArabicOption ? 'font-arabic text-xl md:text-2xl text-right w-full text-slate-800' : 'font-semibold text-slate-700 text-sm md:text-base';
+                    const textClass = q.isArabicOption 
+                        ? 'font-arabic text-xl md:text-2xl text-right w-full text-slate-800' 
+                        : 'font-semibold text-slate-700 text-sm md:text-base';
                     const dirAttr = q.isArabicOption ? 'dir="rtl"' : '';
 
                     btn.innerHTML = `<span class="${textClass}" ${dirAttr}>${opt}</span>`;
@@ -437,7 +527,6 @@
                     });
                 }
 
-                // Nonaktifkan semua tombol setelah memilih
                 allButtons.forEach(btn => btn.disabled = true);
                 this.btnNext.classList.remove('hidden');
             }
@@ -461,7 +550,6 @@
             }
         }
 
-        // Inisialisasi Aplikasi Kuis
         const quizApp = new QuranQuizApp();
     </script>
 </body>
