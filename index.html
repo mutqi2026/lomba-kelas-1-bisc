@@ -412,8 +412,8 @@
                 const currentAyat = surah.ayat[randomAyatIdx];
                 const nextAyat = surah.ayat[randomAyatIdx + 1];
 
-                // Mengambil audio dari qari Mishary Rashid ('05')
-                const audioUrl = currentAyat.audio ? currentAyat.audio['05'] : null;
+                // PERBAIKAN: Mengambil audio Mishary Rashid (biasanya pada key '05' atau mengambil key pertama yang tersedia dari objek audio)
+                const audioUrl = currentAyat.audio ? (currentAyat.audio['05'] || Object.values(currentAyat.audio)[4] || Object.values(currentAyat.audio)[0]) : null;
 
                 let wrongOptions = [];
                 while (wrongOptions.length < 3) {
@@ -432,7 +432,7 @@
                     questionText: `<p class="font-arabic text-2xl md:text-3xl text-indigo-950 font-bold pt-1 mb-1" dir="rtl">${currentAyat.teksArab}</p>
                                    <p class="text-xs text-slate-500 mt-1">(Ayat ${currentAyat.nomorAyat})</p>`,
                     audioUrl: audioUrl,
-                    correctAnswer: nextAyat.teksArab, // <-- INI YANG SEBELUMNYA KETINGGALAN
+                    correctAnswer: nextAyat.teksArab,
                     options: options,
                     isArabicOption: true
                 };
@@ -442,7 +442,9 @@
             createTebakSuratQuestion() {
                 const surah = this.getRandomItem(this.surahsData);
                 const ayat = this.getRandomItem(surah.ayat);
-                const audioUrl = ayat.audio ? ayat.audio['05'] : null;
+                
+                // PERBAIKAN: Mengambil audio Mishary Rashid dengan aman
+                const audioUrl = ayat.audio ? (ayat.audio['05'] || Object.values(ayat.audio)[4] || Object.values(ayat.audio)[0]) : null;
 
                 let wrongOptions = [];
                 while (wrongOptions.length < 3) {
@@ -458,12 +460,13 @@
                     prompt: "Potongan ayat di bawah ini merupakan bagian dari Surah:",
                     questionText: `<p class="font-arabic text-2xl md:text-3xl text-indigo-950 font-bold pt-1" dir="rtl">${ayat.teksArab}</p>`,
                     audioUrl: audioUrl,
-                    correctAnswer: surah.namaLatin, // <-- INI YANG SEBELUMNYA KETINGGALAN
+                    correctAnswer: surah.namaLatin,
                     options: options,
                     isArabicOption: false
                 };
             }
             // Mode 3: Sambung Surah (Tanpa Ayat Arab, Audio disembunyikan)
+          // Mode 3: Sambung Surah
             createSambungSuratQuestion() {
                 const validSurahs = this.surahsData.filter(s => s.nomor < 114);
                 const currentSurah = this.getRandomItem(validSurahs);
@@ -486,6 +489,7 @@
                     questionText: `<p class="text-3xl font-extrabold text-indigo-900 pt-1 mb-2">${currentSurah.namaLatin}</p>
                                    <p class="font-arabic text-xl text-indigo-600" dir="rtl">${currentSurah.nama}</p>`,
                     audioUrl: null,
+                    correctAnswer: nextSurah.namaLatin, // <-- Ditambahkan agar kunci jawaban terbaca
                     options: options,
                     isArabicOption: false
                 };
