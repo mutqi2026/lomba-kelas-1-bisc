@@ -167,9 +167,18 @@
                 </div>
 
                 <!-- Card Soal -->
-                <div class="bg-gradient-to-b from-slate-50 to-indigo-50/50 p-6 rounded-2xl border border-indigo-100/80 shadow-inner">
-                    <p id="prompt-text" class="text-xs font-semibold uppercase tracking-wider text-indigo-500 mb-6 text-center">Soal</p>
-                    <div id="question-box" class="text-center">
+                <div class="bg-gradient-to-b from-slate-50 to-indigo-50/50 p-6 rounded-2xl border border-indigo-100/80 shadow-inner text-center">
+                    <p id="prompt-text" class="text-xs font-semibold uppercase tracking-wider text-indigo-500 mb-4">Soal</p>
+                    
+                    <!-- Tombol Putar Audio (Muncul jika soal memuat ayat Al-Qur'an) -->
+                    <div id="audio-container" class="mb-4 hidden">
+                        <button id="btn-play-audio" onclick="quizApp.toggleAudio()" class="inline-flex items-center space-x-2 px-4 py-2 rounded-full bg-indigo-600 text-white text-xs font-semibold shadow-md hover:bg-indigo-700 transition">
+                            <i id="audio-icon" class="fa-solid fa-volume-high"></i>
+                            <span id="audio-label">Dengarkan Audio Ayat</span>
+                        </button>
+                    </div>
+
+                    <div id="question-box">
                         <!-- Teks Ayat/Soal Arab akan muncul di sini -->
                     </div>
                 </div>
@@ -237,7 +246,7 @@
                 };
 
                 this.selectedGrade = 1;
-                this.loadedGrade = null; // Cache tracker
+                this.loadedGrade = null;
                 this.surahsData = [];
                 this.questions = [];
                 this.currentIndex = 0;
@@ -245,6 +254,10 @@
                 this.selectedMode = '';
                 this.isAnswered = false;
                 this.TOTAL_QUESTIONS = 10;
+
+                // Variabel untuk Audio Murotal
+                this.currentAudio = null;
+                this.isPlayingAudio = false;
 
                 this.initDOM();
             }
@@ -271,17 +284,33 @@
                 this.questionBox = document.getElementById('question-box');
                 this.optionsContainer = document.getElementById('options-container');
                 this.btnNext = document.getElementById('btn-next');
+
+                // Audio Elements
+                this.audioContainer = document.getElementById('audio-container');
+                this.btnPlayAudio = document.getElementById('btn-play-audio');
+                this.audioIcon = document.getElementById('audio-icon');
+                this.audioLabel = document.getElementById('audio-label');
+            }
+
+            // Hentikan audio yang sedang berjalan saat pindah soal/menu
+            stopCurrentAudio() {
+                if (this.currentAudio) {
+                    this.currentAudio.pause();
+                    this.currentAudio = null;
+                    this.isPlayingAudio = false;
+                    this.updateAudioButtonState(false);
+                }
             }
 
             // Navigation Helper
             switchScreen(screenName) {
+                this.stopCurrentAudio();
                 Object.keys(this.screens).forEach(key => {
                     this.screens[key].classList.add('hidden');
                 });
                 this.screens[screenName].classList.remove('hidden');
             }
 
-            // Pemilihan Kelas di Layar Awal
             selectGrade(gradeNum) {
                 this.selectedGrade = gradeNum;
                 const gradeInfo = this.GRADE_CONFIG[gradeNum];
@@ -302,11 +331,9 @@
                 this.switchScreen('menu');
             }
 
-            // Fetch Data Surah dari API equran.id secara Dinamis sesuai Kelas
             async fetchSurahData() {
                 const config = this.GRADE_CONFIG[this.selectedGrade];
                 
-                // Jika data kelas ini sudah pernah didownload, tidak usah fetch ulang
                 if (this.loadedGrade === this.selectedGrade && this.surahsData.length > 0) {
                     return true;
                 }
@@ -334,7 +361,6 @@
                 }
             }
 
-            // Memulai Permainan
             async startQuiz(mode) {
                 this.selectedMode = mode;
                 const loaded = await this.fetchSurahData();
@@ -351,7 +377,6 @@
                 this.startQuiz(this.selectedMode);
             }
 
-            // Generator Soal berdasarkan Mode Kuis
             generateQuestions() {
                 this.questions = [];
 
@@ -374,7 +399,7 @@
                 return [...array].sort(() => Math.random() - 0.5);
             }
 
-            // Mode 1: Sambung Ayat
+            // Mode 1: Sambung Ayat (Menyediakan Audio)
             createSambungAyatQuestion() {
                 const surah = this.getRandomItem(this.surahsData);
                 const validAyatCount = surah.jumlahAyat - 1;
@@ -386,6 +411,9 @@
                 const randomAyatIdx = Math.floor(Math.random() * validAyatCount);
                 const currentAyat = surah.ayat[randomAyatIdx];
                 const nextAyat = surah.ayat[randomAyatIdx + 1];
+
+                // Mengambil audio dari qari pilihan pertama API equran.id (biasanya qari '01')
+                const audioUrl = currentAyat.audio ? currentAyat.audio['01'] : null;
 
                 let wrongOptions = [];
                 while (wrongOptions.length < 3) {
@@ -401,18 +429,19 @@
 
                 return {
                     prompt: `Lanjutkan ayat berikutnya dari Surah ${surah.namaLatin}:`,
-                    questionText: `<p class="font-arabic text-2xl md:text-3xl text-indigo-950 font-bold pt-2 mb-2" dir="rtl">${currentAyat.teksArab}</p>
-                                   <p class="text-xs text-slate-500 mt-2">(Ayat ${currentAyat.nomorAyat})</p>`,
-                    correctAnswer: nextAyat.teksArab,
+                    questionText: `<p class="font-arabic text-2xl md:text-3xl text-indigo-950 font-bold pt-1 mb-1" dir="rtl">${currentAyat.teksArab}</p>
+                                   <p class="text-xs text-slate-500 mt-1">(Ayat ${currentAyat.nomorAyat})</p>`,
+                    audioUrl: audioUrl,
                     options: options,
                     isArabicOption: true
                 };
             }
 
-            // Mode 2: Tebak Nama Surah
+            // Mode 2: Tebak Nama Surah (Menyediakan Audio)
             createTebakSuratQuestion() {
                 const surah = this.getRandomItem(this.surahsData);
                 const ayat = this.getRandomItem(surah.ayat);
+                const audioUrl = ayat.audio ? ayat.audio['01'] : null;
 
                 let wrongOptions = [];
                 while (wrongOptions.length < 3) {
@@ -426,16 +455,15 @@
 
                 return {
                     prompt: "Potongan ayat di bawah ini merupakan bagian dari Surah:",
-                    questionText: `<p class="font-arabic text-2xl md:text-3xl text-indigo-950 font-bold pt-2" dir="rtl">${ayat.teksArab}</p>`,
-                    correctAnswer: surah.namaLatin,
+                    questionText: `<p class="font-arabic text-2xl md:text-3xl text-indigo-950 font-bold pt-1" dir="rtl">${ayat.teksArab}</p>`,
+                    audioUrl: audioUrl,
                     options: options,
                     isArabicOption: false
                 };
             }
 
-            // Mode 3: Sambung Surah
+            // Mode 3: Sambung Surah (Tanpa Ayat Arab, Audio disembunyikan)
             createSambungSuratQuestion() {
-                // Pilih surah kecuali An-Nas (surah 114 paling akhir)
                 const validSurahs = this.surahsData.filter(s => s.nomor < 114);
                 const currentSurah = this.getRandomItem(validSurahs);
                 const nextSurah = this.surahsData.find(s => s.nomor === currentSurah.nomor + 1);
@@ -454,16 +482,59 @@
 
                 return {
                     prompt: "Surah apakah yang urutannya langsung setelah Surah ini?",
-                    questionText: `<p class="text-3xl font-extrabold text-indigo-900 pt-2 mb-2">${currentSurah.namaLatin}</p>
+                    questionText: `<p class="text-3xl font-extrabold text-indigo-900 pt-1 mb-2">${currentSurah.namaLatin}</p>
                                    <p class="font-arabic text-xl text-indigo-600" dir="rtl">${currentSurah.nama}</p>`,
-                    correctAnswer: nextSurah.namaLatin,
+                    audioUrl: null,
                     options: options,
                     isArabicOption: false
                 };
             }
 
+            // Kontrol Pemutaran Audio
+            toggleAudio() {
+                const q = this.questions[this.currentIndex];
+                if (!q.audioUrl) return;
+
+                if (this.isPlayingAudio && this.currentAudio) {
+                    this.currentAudio.pause();
+                    this.currentAudio.currentTime = 0;
+                    this.isPlayingAudio = false;
+                    this.updateAudioButtonState(false);
+                } else {
+                    this.stopCurrentAudio();
+                    this.currentAudio = new Audio(q.audioUrl);
+                    this.isPlayingAudio = true;
+                    this.updateAudioButtonState(true);
+
+                    this.currentAudio.play().catch(e => {
+                        console.error("Gagal memutar audio:", e);
+                        this.stopCurrentAudio();
+                    });
+
+                    this.currentAudio.onended = () => {
+                        this.isPlayingAudio = false;
+                        this.updateAudioButtonState(false);
+                    };
+                }
+            }
+
+            updateAudioButtonState(isPlaying) {
+                if (isPlaying) {
+                    this.audioIcon.className = "fa-solid fa-stop";
+                    this.audioLabel.textContent = "Hentikan Audio";
+                    this.btnPlayAudio.classList.remove('bg-indigo-600', 'hover:bg-indigo-700');
+                    this.btnPlayAudio.classList.add('bg-rose-600', 'hover:bg-rose-700', 'animate-pulse');
+                } else {
+                    this.audioIcon.className = "fa-solid fa-volume-high";
+                    this.audioLabel.textContent = "Dengarkan Audio Ayat";
+                    this.btnPlayAudio.classList.remove('bg-rose-600', 'hover:bg-rose-700', 'animate-pulse');
+                    this.btnPlayAudio.classList.add('bg-indigo-600', 'hover:bg-indigo-700');
+                }
+            }
+
             // Render Soal ke Layar
             renderQuestion() {
+                this.stopCurrentAudio();
                 this.isAnswered = false;
                 this.btnNext.classList.add('hidden');
 
@@ -483,6 +554,13 @@
                 this.promptText.textContent = q.prompt;
                 this.questionBox.innerHTML = q.questionText;
 
+                // Tampilkan atau Sembunyikan Tombol Audio Berdasarkan Ketersediaan URL Audio
+                if (q.audioUrl) {
+                    this.audioContainer.classList.remove('hidden');
+                } else {
+                    this.audioContainer.classList.add('hidden');
+                }
+
                 // Render Pilihan Jawaban
                 this.optionsContainer.innerHTML = '';
                 q.options.forEach((opt) => {
@@ -500,10 +578,10 @@
                 });
             }
 
-            // Pemeriksaan Jawaban
             checkAnswer(selectedBtn, selectedOpt, correctOpt) {
                 if (this.isAnswered) return;
                 this.isAnswered = true;
+                this.stopCurrentAudio();
 
                 const allButtons = this.optionsContainer.querySelectorAll('button');
 
@@ -518,7 +596,6 @@
                     selectedBtn.classList.add('border-rose-500', 'bg-rose-50', 'text-rose-900');
                     selectedBtn.innerHTML += `<i class="fa-solid fa-circle-xmark text-rose-600 text-lg ml-2"></i>`;
 
-                    // Highlight jawaban yang benar
                     allButtons.forEach(btn => {
                         if (btn.innerText.includes(correctOpt)) {
                             btn.classList.remove('border-slate-200', 'bg-white');
@@ -531,7 +608,6 @@
                 this.btnNext.classList.remove('hidden');
             }
 
-            // Lanjut ke Soal Berikutnya
             nextQuestion() {
                 this.currentIndex++;
                 if (this.currentIndex < this.TOTAL_QUESTIONS) {
@@ -541,8 +617,8 @@
                 }
             }
 
-            // Tampilkan Hasil Akhir
             showResult() {
+                this.stopCurrentAudio();
                 document.getElementById('final-score').textContent = this.score;
                 const accuracy = (this.score / (this.TOTAL_QUESTIONS * 10)) * 100;
                 document.getElementById('final-accuracy').textContent = `${accuracy}%`;
