@@ -174,7 +174,7 @@
                     <div id="audio-container" class="mb-4 hidden">
                         <button id="btn-play-audio" onclick="quizApp.toggleAudio()" class="inline-flex items-center space-x-2 px-4 py-2 rounded-full bg-indigo-600 text-white text-xs font-semibold shadow-md hover:bg-indigo-700 transition">
                             <i id="audio-icon" class="fa-solid fa-volume-high"></i>
-                            <span id="audio-label">Dengarkan Audio Ayat</span>
+                            <span id="audio-label">Dengarkan Audio Ayat (Mishary Rashid)</span>
                         </button>
                     </div>
 
@@ -399,7 +399,14 @@
                 return [...array].sort(() => Math.random() - 0.5);
             }
 
-// Mode 1: Sambung Ayat
+            // Helper untuk mengambil URL Audio Qari Mishary Rashid secara aman
+            getAudioUrl(audioObj) {
+                if (!audioObj) return null;
+                // '05' adalah kode Mishary Rashid Alafasy pada API equran.id
+                return audioObj['05'] || audioObj['01'] || Object.values(audioObj)[0] || null;
+            }
+
+            // Mode 1: Sambung Ayat
             createSambungAyatQuestion() {
                 const surah = this.getRandomItem(this.surahsData);
                 const validAyatCount = surah.jumlahAyat - 1;
@@ -412,8 +419,7 @@
                 const currentAyat = surah.ayat[randomAyatIdx];
                 const nextAyat = surah.ayat[randomAyatIdx + 1];
 
-                // PERBAIKAN: Mengambil audio Mishary Rashid (biasanya pada key '05' atau mengambil key pertama yang tersedia dari objek audio)
-                const audioUrl = currentAyat.audio ? (currentAyat.audio['05'] || Object.values(currentAyat.audio)[4] || Object.values(currentAyat.audio)[0]) : null;
+                const audioUrl = this.getAudioUrl(currentAyat.audio);
 
                 let wrongOptions = [];
                 while (wrongOptions.length < 3) {
@@ -443,8 +449,7 @@
                 const surah = this.getRandomItem(this.surahsData);
                 const ayat = this.getRandomItem(surah.ayat);
                 
-                // PERBAIKAN: Mengambil audio Mishary Rashid dengan aman
-                const audioUrl = ayat.audio ? (ayat.audio['05'] || Object.values(ayat.audio)[4] || Object.values(ayat.audio)[0]) : null;
+                const audioUrl = this.getAudioUrl(ayat.audio);
 
                 let wrongOptions = [];
                 while (wrongOptions.length < 3) {
@@ -465,8 +470,8 @@
                     isArabicOption: false
                 };
             }
-            // Mode 3: Sambung Surah (Tanpa Ayat Arab, Audio disembunyikan)
-          // Mode 3: Sambung Surah
+
+            // Mode 3: Sambung Surah
             createSambungSuratQuestion() {
                 const validSurahs = this.surahsData.filter(s => s.nomor < 114);
                 const currentSurah = this.getRandomItem(validSurahs);
@@ -489,12 +494,12 @@
                     questionText: `<p class="text-3xl font-extrabold text-indigo-900 pt-1 mb-2">${currentSurah.namaLatin}</p>
                                    <p class="font-arabic text-xl text-indigo-600" dir="rtl">${currentSurah.nama}</p>`,
                     audioUrl: null,
-                    correctAnswer: nextSurah.namaLatin, // <-- Ditambahkan agar kunci jawaban terbaca
+                    correctAnswer: nextSurah.namaLatin.trim(),
                     options: options,
                     isArabicOption: false
                 };
             }
-
+            
             // Kontrol Pemutaran Audio
             toggleAudio() {
                 const q = this.questions[this.currentIndex];
@@ -502,7 +507,7 @@
 
                 if (this.isPlayingAudio && this.currentAudio) {
                     this.currentAudio.pause();
-                    this.currentAudio.currentTime = 0;
+                    this.currentAudio = null;
                     this.isPlayingAudio = false;
                     this.updateAudioButtonState(false);
                 } else {
@@ -531,7 +536,7 @@
                     this.btnPlayAudio.classList.add('bg-rose-600', 'hover:bg-rose-700', 'animate-pulse');
                 } else {
                     this.audioIcon.className = "fa-solid fa-volume-high";
-                    this.audioLabel.textContent = "Dengarkan Audio Ayat";
+                    this.audioLabel.textContent = "Dengarkan Audio Ayat (Mishary Rashid)";
                     this.btnPlayAudio.classList.remove('bg-rose-600', 'hover:bg-rose-700', 'animate-pulse');
                     this.btnPlayAudio.classList.add('bg-indigo-600', 'hover:bg-indigo-700');
                 }
@@ -583,19 +588,32 @@
                 });
             }
 
-           checkAnswer(selectedBtn, selectedOpt, correctOpt) {
+            // Fungsi pembersih harakat & tanda baca Arab agar pencocokan akurat
+            normalizeArabic(text) {
+                if (!text) return '';
+                return text
+                    .replace(/[\u064B-\u065F\u0670]/g, '') // Hapus harakat
+                    .replace(/[\u06D6-\u06ED]/g, '') // Hapus tanda waqaf
+                    .replace(/\s+/g, ' ')
+                    .trim();
+            }
+
+            checkAnswer(selectedBtn, selectedOpt, correctOpt) {
                 if (this.isAnswered) return;
                 this.isAnswered = true;
                 this.stopCurrentAudio();
 
-                // Debugging di Console Browser untuk melihat perbandingan teks
-                console.log("Pilihan User :", selectedOpt);
-                console.log("Kunci Benar  :", correctOpt);
-                console.log("Status Sama  :", selectedOpt === correctOpt);
+                const isArabic = /[\u0600-\u06FF]/.test(correctOpt);
+                const cleanSelected = isArabic ? this.normalizeArabic(selectedOpt) : selectedOpt.trim();
+                const cleanCorrect = isArabic ? this.normalizeArabic(correctOpt) : correctOpt.trim();
+
+                console.log("Pilihan User (Clean):", cleanSelected);
+                console.log("Kunci Benar (Clean) :", cleanCorrect);
+                console.log("Status Sama         :", cleanSelected === cleanCorrect);
 
                 const allButtons = this.optionsContainer.querySelectorAll('button');
 
-                if (selectedOpt === correctOpt) {
+                if (cleanSelected === cleanCorrect) {
                     this.score += 10;
                     this.currentScoreEl.textContent = this.score;
                     selectedBtn.classList.remove('border-slate-200', 'bg-white');
@@ -607,7 +625,9 @@
                     selectedBtn.innerHTML += `<i class="fa-solid fa-circle-xmark text-rose-600 text-lg ml-2"></i>`;
 
                     allButtons.forEach(btn => {
-                        if (btn.innerText.includes(correctOpt)) {
+                        const btnText = btn.innerText;
+                        const cleanBtnText = isArabic ? this.normalizeArabic(btnText) : btnText.trim();
+                        if (cleanBtnText === cleanCorrect) {
                             btn.classList.remove('border-slate-200', 'bg-white');
                             btn.classList.add('border-emerald-500', 'bg-emerald-50');
                         }
@@ -617,7 +637,7 @@
                 allButtons.forEach(btn => btn.disabled = true);
                 this.btnNext.classList.remove('hidden');
             }
-
+            
             nextQuestion() {
                 this.currentIndex++;
                 if (this.currentIndex < this.TOTAL_QUESTIONS) {
