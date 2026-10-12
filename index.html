@@ -399,7 +399,7 @@
                 return [...array].sort(() => Math.random() - 0.5);
             }
 
-            // Mode 1: Sambung Ayat (Menyediakan Audio)
+// Mode 1: Sambung Ayat
             createSambungAyatQuestion() {
                 const surah = this.getRandomItem(this.surahsData);
                 const validAyatCount = surah.jumlahAyat - 1;
@@ -412,7 +412,7 @@
                 const currentAyat = surah.ayat[randomAyatIdx];
                 const nextAyat = surah.ayat[randomAyatIdx + 1];
 
-                // Mengambil audio dari qari pilihan pertama API equran.id (biasanya qari '01')
+                // Mengambil audio dari qari Mishary Rashid ('05')
                 const audioUrl = currentAyat.audio ? currentAyat.audio['05'] : null;
 
                 let wrongOptions = [];
@@ -432,16 +432,17 @@
                     questionText: `<p class="font-arabic text-2xl md:text-3xl text-indigo-950 font-bold pt-1 mb-1" dir="rtl">${currentAyat.teksArab}</p>
                                    <p class="text-xs text-slate-500 mt-1">(Ayat ${currentAyat.nomorAyat})</p>`,
                     audioUrl: audioUrl,
+                    correctAnswer: nextAyat.teksArab, // <-- INI YANG SEBELUMNYA KETINGGALAN
                     options: options,
                     isArabicOption: true
                 };
             }
 
-            // Mode 2: Tebak Nama Surah (Menyediakan Audio)
+            // Mode 2: Tebak Nama Surah
             createTebakSuratQuestion() {
                 const surah = this.getRandomItem(this.surahsData);
                 const ayat = this.getRandomItem(surah.ayat);
-                const audioUrl = ayat.audio ? ayat.audio['01'] : null;
+                const audioUrl = ayat.audio ? ayat.audio['05'] : null;
 
                 let wrongOptions = [];
                 while (wrongOptions.length < 3) {
@@ -457,11 +458,11 @@
                     prompt: "Potongan ayat di bawah ini merupakan bagian dari Surah:",
                     questionText: `<p class="font-arabic text-2xl md:text-3xl text-indigo-950 font-bold pt-1" dir="rtl">${ayat.teksArab}</p>`,
                     audioUrl: audioUrl,
+                    correctAnswer: surah.namaLatin, // <-- INI YANG SEBELUMNYA KETINGGALAN
                     options: options,
                     isArabicOption: false
                 };
             }
-
             // Mode 3: Sambung Surah (Tanpa Ayat Arab, Audio disembunyikan)
             createSambungSuratQuestion() {
                 const validSurahs = this.surahsData.filter(s => s.nomor < 114);
