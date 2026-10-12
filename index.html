@@ -578,10 +578,15 @@
                 });
             }
 
-            checkAnswer(selectedBtn, selectedOpt, correctOpt) {
+           checkAnswer(selectedBtn, selectedOpt, correctOpt) {
                 if (this.isAnswered) return;
                 this.isAnswered = true;
                 this.stopCurrentAudio();
+
+                // Debugging di Console Browser untuk melihat perbandingan teks
+                console.log("Pilihan User :", selectedOpt);
+                console.log("Kunci Benar  :", correctOpt);
+                console.log("Status Sama  :", selectedOpt === correctOpt);
 
                 const allButtons = this.optionsContainer.querySelectorAll('button');
 
